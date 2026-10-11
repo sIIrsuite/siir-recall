@@ -3,9 +3,10 @@ import {ReadingProgress} from '../components/reading-progress';
 import {ParallelLesson} from '../components/parallel-lesson';
 import {NoteContent} from '../components/note-content';
 import {ExportMenu} from '../components/export-menu';
+import {CollectionPolyhedron} from '../components/collection-polyhedron';
 import {ArrowLeft,ArrowRight,Search,Sun,Moon,X} from 'lucide-react';
 import {notes,topics, type Note} from '../lib/notes';
-const subjects=topics.map(topic=>topic.title);
+const collections=topics.map(topic=>({...topic,count:notes.filter(note=>note.subject===topic.title).length}));
 const descriptions=Object.fromEntries(topics.map(topic=>[topic.title,topic.description]));
 
 export default function Home(){
@@ -35,11 +36,11 @@ export default function Home(){
    <div className="article-content" ref={article}><div className="article-heading"><span className="eyebrow">{String(index+1).padStart(2,'0')} / {sequence.length} · {Math.max(1,Math.ceil(`${active.body} ${active.mathBody||''}`.split(/\s+/).length/180))} MIN READ</span><h1>{active.title}</h1>{active.summary&&<p className="dek">{active.summary}</p>}</div>
    {active.mathBody?<ParallelLesson key={active.id} note={active}/>:<NoteContent note={active}/>}</div>
    <nav className="article-pagination" aria-label="Lesson navigation">{index>0?<a href={`#${sequence[index-1].id}`}><ArrowLeft size={16}/> Previous</a>:<button onClick={()=>openCollection(active.subject)}>Back to collection</button>}{index<sequence.length-1&&<a href={`#${sequence[index+1].id}`}>Next lesson <ArrowRight size={16}/></a>}</nav>
-  </main>:<main className="library">
+  </main>:<main className={`library ${!subject?'library-home':''}`}>
    {subject&&<button className="back-link" onClick={library}><ArrowLeft size={16}/> All collections</button>}
-   <div className="library-heading"><span className="eyebrow">{subject?`${results.length} NOTES`:'A SIIRSUITE PROJECT'}</span><h1>{subject||'Keep the reasoning.'}</h1><p>{subject?descriptions[subject]:'Notes on mathematics, music, and the ideas worth returning to.'}</p></div>
+   <div className="library-heading">{subject?<><span className="eyebrow">{results.length} NOTES</span><h1>{subject}</h1><p>{descriptions[subject]}</p></>:<h1>AI summarized notes</h1>}</div>
    <label className="search"><Search size={18}/><input aria-label="Search notes" placeholder="Search notes…" value={query} onChange={e=>setQuery(e.target.value)}/>{query&&<button aria-label="Clear search" onClick={()=>setQuery('')}><X size={16}/></button>}</label>
-   {!subject&&!query?<section className="collections" aria-label="Collections">{subjects.map((name,i)=><button className="collection" key={name} onClick={()=>openCollection(name)}><span className="collection-meta">0{i+1} / {notes.filter(n=>n.subject===name).length} notes</span><h2>{name}</h2><p>{descriptions[name]}</p><span className="collection-action">Explore collection <ArrowRight size={18}/></span></button>)}</section>:<section className="note-list" aria-label={query?'Search results':'Collection notes'}>{query&&<p className="result-count">{results.length} matching notes</p>}{results.length?results.map((n,i)=><NoteLink key={n.id} note={n} index={i}/>):<p className="empty">No matching notes. Try a shorter phrase.</p>}</section>}
+   {!subject&&!query?<CollectionPolyhedron collections={collections} onSelect={openCollection}/>:<section className="note-list" aria-label={query?'Search results':'Collection notes'}>{query&&<p className="result-count">{results.length} matching notes</p>}{results.length?results.map((n,i)=><NoteLink key={n.id} note={n} index={i}/>):<p className="empty">No matching notes. Try a shorter phrase.</p>}</section>}
   </main>}
   <footer className="footer"><span>sIIr recall</span><span>A Siirsuite project · Sahil Raj</span></footer>
  </div>
