@@ -2,6 +2,7 @@ import {useEffect,useRef} from 'react';
 import {Download} from 'lucide-react';
 import type {Note} from '../lib/notes';
 import {collectionSlug,exportPath} from '../lib/export-paths';
+import {OPENAI_MATH_COLLECTION} from '../lib/notes';
 
 export function ExportMenu({note,collection,slug:topicSlug}:{note?:Note;collection:string;slug?:string}){
  const menu=useRef<HTMLDetailsElement>(null);
@@ -15,7 +16,9 @@ export function ExportMenu({note,collection,slug:topicSlug}:{note?:Note;collecti
  useEffect(()=>{menu.current?.removeAttribute('open')},[note?.id,collection]);
  function link(name:string,extension:string,label:string){return <a href={exportPath(name,extension)} download onClick={()=>menu.current?.removeAttribute('open')}>{label}</a>}
  return <details className="export-menu" ref={menu}><summary><Download size={17}/><span>Export</span></summary><div className="export-options">
+  {collection===OPENAI_MATH_COLLECTION?<section aria-label="Download source package"><span className="export-label">OpenAI maths catalogue</span><a href={`${import.meta.env.BASE_URL}exports/openai-math-knowledge-base.zip`} download onClick={()=>menu.current?.removeAttribute('open')}>Complete source ZIP</a></section>:<>
   {note&&<section aria-label="Export current note"><span className="export-label">This note</span>{link(note.id,'pdf','PDF')}{link(note.id,'md','Markdown')}</section>}
   <section aria-label="Export collection"><span className="export-label">Collection · {collection}</span>{link(slug,'pdf','PDF · combined')}{link(`${slug}-pdf`,'zip','PDF ZIP · separate notes')}{link(slug,'md','Markdown · combined')}{link(`${slug}-markdown`,'zip','Markdown ZIP · separate notes')}</section>
+  </>}
  </div></details>
 }

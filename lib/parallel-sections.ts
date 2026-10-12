@@ -12,6 +12,7 @@ function sections(body:string){
 }
 export function parallelSections(note:Note):ParallelSection[]{
  if(!note.mathBody)return [];
+ if(note.topicSlug==='openai-math')return [{id:'source',title:'Source notes',explanation:note.body,math:note.mathBody}];
  const explanation=sections(note.body),math=sections(note.mathBody);
  if(explanation.items.length!==math.items.length||explanation.items.some((s,i)=>s.id!==math.items[i].id||s.title!==math.items[i].title))throw Error(`Use the same ## section headings in both panes of ${note.id}`);
  if(new Set(explanation.items.map(s=>s.id)).size!==explanation.items.length)throw Error(`Use unique section IDs or headings in ${note.id}`);
